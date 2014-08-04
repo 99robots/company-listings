@@ -247,7 +247,12 @@ class StartUpDirectory {
 	 * @return void
 	 */
 	static function add_shortcode_admin() {
-		require_once(STARTUP_DIRECTORY_PLUGIN_DIR . '/include/api_src/represent-map/admin/index.php');
+
+		global $post;
+
+		if (is_singular($post)) {
+			require_once(STARTUP_DIRECTORY_PLUGIN_DIR . '/include/api_src/represent-map/admin/index.php');
+		}
 	}
 
 	/**
@@ -258,7 +263,12 @@ class StartUpDirectory {
 	 * @return void
 	 */
 	static function add_shortcode_portal() {
-		include_once(STARTUP_DIRECTORY_PLUGIN_DIR . '/include/api_src/represent-map/index.php');
+
+		global $post;
+
+		if (is_singular($post)) {
+			include_once(STARTUP_DIRECTORY_PLUGIN_DIR . '/include/api_src/represent-map/index.php');
+		}
 	}
 }
 
