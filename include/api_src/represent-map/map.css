@@ -25,7 +25,7 @@ form
 }
 
 /* google maps */
-html, body, #map_canvas 
+html, body, #map_canvas
 {
   margin: 0;
   padding: 0;
@@ -261,7 +261,7 @@ html, body, #map_canvas
   padding: 3px 6px;
   color: #eee;
 }
-.list .category .category_info:hover 
+.list .category .category_info:hover
 {
   text-decoration: none;
 }
@@ -311,7 +311,7 @@ html, body, #map_canvas
   outline: none;
   color: #ccc;
   font-weight: normal;
-  line-height: 1.4em; 
+  line-height: 1.4em;
 }
 .list .list-items li a:hover
 {
@@ -332,13 +332,13 @@ html, body, #map_canvas
 .marker_label
 {
   display: none;
-  position: relative; 
-  left: -50%; 
+  position: relative;
+  left: -50%;
   top: -8px;
-  white-space: nowrap; 
-  padding: 2px 4px; 
-  font-size: 8pt; 
-  background-color: rgba(0,0,0,.7); 
+  white-space: nowrap;
+  padding: 2px 4px;
+  font-size: 8pt;
+  background-color: rgba(0,0,0,.7);
   color: #fff;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;

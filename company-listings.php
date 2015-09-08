@@ -38,38 +38,133 @@ if (!defined('STARTUP_DIRECTORY_VERSION_NUM'))
  * Activatation / Deactivation
  */
 
-register_activation_hook( __FILE__, array('StartUpDirectory', 'register_activation'));
+register_activation_hook( __FILE__, array('CompanyListings', 'register_activation'));
 
 /**
  * Hooks / Filter
  */
 
-add_action('init', array('StartUpDirectory', 'load_textdoamin'));
-add_action('admin_menu', array('StartUpDirectory', 'startup_directory_menu_page'));
-add_action('admin_enqueue_scripts', array('StartUpDirectory', 'startup_directory_include_admin_scripts'));
-add_shortcode('company_listings_admin', array('StartUpDirectory', 'add_shortcode_admin'));
-add_shortcode('company_listings_portal', array('StartUpDirectory', 'add_shortcode_portal'));
+add_action('init', array('CompanyListings', 'load_textdoamin'));
+add_action('init', array('CompanyListings', 'register_companies'));
+add_action('admin_menu', array('CompanyListings', 'startup_directory_menu_page'));
+add_action('admin_enqueue_scripts', array('CompanyListings', 'startup_directory_include_admin_scripts'));
+add_shortcode('company_listings_admin', array('CompanyListings', 'add_shortcode_admin'));
+add_shortcode('company_listings_portal', array('CompanyListings', 'add_shortcode_portal'));
 
 /**
- *  StartUpDirectory main class
+ *  CompanyListings main class
  *
  * @since 1.0.0
  * @using Wordpress 3.8
  */
 
-class StartUpDirectory {
+class CompanyListings {
 
-	/* Properties */
+	/**
+	 * text_domain
+	 *
+	 * (default value: 'company-listings')
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $text_domain = 'company-listings';
 
-	private static $text_domain = 'startup-directory';
+	/**
+	 * prefix
+	 *
+	 * (default value: 'startup_directory_')
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $prefix = 'company_listings_';
 
-	private static $prefix = 'startup_directory_';
+	/**
+	 * prefix_dash
+	 *
+	 * (default value: 'com-lis-')
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $prefix_dash = 'com-lis-';
 
-	private static $settings_page = 'startup-directory-admin-menu-settings';
+	/**
+	 * settings_page
+	 *
+	 * (default value: 'company-listings-admin-menu-settings')
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $settings_page = 'company-listings-admin-menu-settings';
 
-	private static $usage_page = 'startup-directory-admin-menu-usage';
+	/**
+	 * usage_page
+	 *
+	 * (default value: 'company-listings-admin-menu-usage')
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $usage_page = 'company-listings-admin-menu-usage';
 
-	private static $option_version = 'startup_directory_version';
+	/**
+	 * option_version
+	 *
+	 * (default value: 'company_listings_version')
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $option_version = 'company_listings_version';
+
+	/**
+	 * default_types
+	 *
+	 * @var mixed
+	 * @access public
+	 * @static
+	 */
+	public static $default_types = array(
+		array(
+			'name'			=> 'Startups',
+			'description'	=> '',
+			'slug'			=> 'startups',
+		),
+		array(
+			'name'			=> 'Accelerators',
+			'description'	=> '',
+			'slug'			=> 'accelerators',
+		),
+		array(
+			'name'			=> 'Incubators',
+			'description'	=> '',
+			'slug'			=> 'incubators',
+		),
+		array(
+			'name'			=> 'Coworking',
+			'description'	=> '',
+			'slug'			=> 'coworking',
+		),
+		array(
+			'name'			=> 'Investors',
+			'description'	=> '',
+			'slug'			=> 'investors',
+		),
+		array(
+			'name'			=> 'Consulting',
+			'description'	=> '',
+			'slug'			=> 'consulting',
+		)
+	);
 
 	/**
 	 * Load the text domain
@@ -78,6 +173,82 @@ class StartUpDirectory {
 	 */
 	static function load_textdoamin() {
 		load_plugin_textdomain(self::$text_domain, false, STARTUP_DIRECTORY_PLUGIN_DIR . '/languages');
+
+	}
+
+
+	/**
+	 * Register the Company Post Type
+	 *
+	 * @since 1.0.0
+	 */
+	static function register_companies() {
+		// Register Custom Post Types
+
+		$labels = array(
+			'name'                => _x( 'Companies', 'Post Type General Name', self::$text_domain ),
+			'singular_name'       => _x( 'Company', 'Post Type Singular Name', self::$text_domain ),
+			'menu_name'           => __( 'Company', self::$text_domain ),
+			'parent_item_colon'   => __( 'Parent Item:', self::$text_domain ),
+			'all_items'           => __( 'All Companies', self::$text_domain ),
+			'view_item'           => __( 'View Company', self::$text_domain ),
+			'add_new_item'        => __( 'Add New Company', self::$text_domain ),
+			'add_new'             => __( 'Add Company', self::$text_domain ),
+			'edit_item'           => __( 'Edit Company', self::$text_domain ),
+			'update_item'         => __( 'Update Company', self::$text_domain ),
+			'search_items'        => __( 'Search Company', self::$text_domain ),
+			'not_found'           => __( 'Not found', self::$text_domain ),
+			'not_found_in_trash'  => __( 'Not found in Trash', self::$text_domain ),
+		);
+		$args = array(
+			'label'               => __( 'cl_company', self::$text_domain ),
+			'description'         => __( 'A company listing', self::$text_domain ),
+			'labels'              => $labels,
+			'supports'            => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'comments', 'revisions', 'custom-fields', 'post-formats'),
+			'hierarchical'        => false,
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'show_in_nav_menus'   => true,
+			'show_in_admin_bar'   => true,
+			'menu_position'       => 5,
+			'can_export'          => true,
+			'has_archive'         => true,
+			'exclude_from_search' => false,
+			'publicly_queryable'  => true,
+			'capability_type'     => 'page',
+		);
+		register_post_type( 'cl_company', $args );
+
+		// Register Custom Taxonomies
+
+		$labels = array(
+			'name'                       => _x( 'Type', 'Taxonomy General Name', self::$text_domain ),
+			'singular_name'              => _x( 'Types', 'Taxonomy Singular Name', self::$text_domain ),
+			'menu_name'                  => __( 'Types', self::$text_domain ),
+			'all_items'                  => __( 'All Types', self::$text_domain ),
+			'parent_item'                => __( 'Parent Item', self::$text_domain ),
+			'parent_item_colon'          => __( 'Parent Item:', self::$text_domain ),
+			'new_item_name'              => __( 'New Type Name', self::$text_domain ),
+			'add_new_item'               => __( 'Add New Type', self::$text_domain ),
+			'edit_item'                  => __( 'Edit Type', self::$text_domain ),
+			'update_item'                => __( 'Update Type', self::$text_domain ),
+			'separate_items_with_commas' => __( 'Separate types with commas', self::$text_domain ),
+			'search_items'               => __( 'Search Types', self::$text_domain ),
+			'add_or_remove_items'        => __( 'Add or remove types', self::$text_domain ),
+			'choose_from_most_used'      => __( 'Choose from the most used types', self::$text_domain ),
+			'not_found'                  => __( 'Not Found', self::$text_domain ),
+		);
+		$args = array(
+			'labels'                     => $labels,
+			'hierarchical'               => true,
+			'public'                     => true,
+			'show_ui'                    => true,
+			'show_admin_column'          => true,
+			'show_in_nav_menus'          => true,
+			'show_tagcloud'              => true,
+		);
+		register_taxonomy( 'cl_type', array( 'cl_company' ), $args );
 	}
 
 	/**
@@ -95,7 +266,25 @@ class StartUpDirectory {
 			add_option(self::$option_version, STARTUP_DIRECTORY_VERSION_NUM);
 		}
 
-		global $wpdb;
+		self::register_companies();
+
+		// Add Default Types
+
+		foreach (self::$default_types as $type) {
+			wp_insert_term(
+				$type['name'], // the term
+				'cl_type', // the taxonomy
+				array(
+					'description'	=> $type['description'],
+					'slug'     		=> $type['slug']
+				)
+			);
+		}
+
+		flush_rewrite_rules();
+
+		/*
+global $wpdb;
 
 		// Events
 
@@ -141,6 +330,7 @@ class StartUpDirectory {
 		) ENGINE=MyISAM DEFAULT CHARSET=latin1;");
 
 		$wpdb->query("INSERT INTO `settings` (`sg_lastupdate`) VALUES (0);");
+*/
 	}
 
 	/**
@@ -158,10 +348,10 @@ class StartUpDirectory {
 			__('Company Listings', self::$text_domain), 					// Menu Name
 	    	'manage_options', 											// Capabilities
 	    	self::$settings_page, 										// slug
-	    	array('StartUpDirectory', 'startup_directory_admin_settings')	// Callback function
+	    	array('CompanyListings', 'startup_directory_admin_settings')	// Callback function
 	    );
 
-	    add_action('admin_print_scripts-' . $page_settings_load, array('StartUpDirectory', 'include_scripts_inline'));
+	    add_action('admin_print_scripts-' . $page_settings_load, array('CompanyListings', 'include_scripts_inline'));
 	}
 
 	/**
@@ -173,7 +363,7 @@ class StartUpDirectory {
 
 		/* CSS */
 
-		wp_register_style('startup_directory_admin_css', STARTUP_DIRECTORY_PLUGIN_URL . '/include/css/startup_directory_admin.css');
+		wp_register_style('startup_directory_admin_css', STARTUP_DIRECTORY_PLUGIN_URL . '/css/startup_directory_admin.css');
 		wp_enqueue_style('startup_directory_admin_css');
 	}
 
@@ -234,7 +424,7 @@ class StartUpDirectory {
 
 			/* Javascript */
 
-			wp_register_script('startup_directory_admin_js', STARTUP_DIRECTORY_PLUGIN_URL . '/include/js/startup_directory_admin.js');
+			wp_register_script('startup_directory_admin_js', STARTUP_DIRECTORY_PLUGIN_URL . '/js/startup_directory_admin.js');
 			wp_enqueue_script('startup_directory_admin_js');
 		}
 	}
@@ -252,6 +442,9 @@ class StartUpDirectory {
 
 		if (is_singular($post)) {
 			require_once(STARTUP_DIRECTORY_PLUGIN_DIR . '/include/api_src/represent-map/admin/index.php');
+
+			wp_register_style('startup_directory_admin_css', STARTUP_DIRECTORY_PLUGIN_URL . '/css/startup_directory_admin.css');
+			wp_enqueue_style('startup_directory_admin_css');
 		}
 	}
 
@@ -268,6 +461,9 @@ class StartUpDirectory {
 
 		if (is_singular($post)) {
 			include_once(STARTUP_DIRECTORY_PLUGIN_DIR . '/include/api_src/represent-map/index.php');
+
+			wp_register_style('startup_directory_portal_css', STARTUP_DIRECTORY_PLUGIN_URL . '/css/startup_directory_portal.css');
+			wp_enqueue_style('startup_directory_portal_css');
 		}
 	}
 }
